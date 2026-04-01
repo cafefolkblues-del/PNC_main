@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Verification_End.unity
     guid: c4e8f2a1b3d547698012efabcd901234
+  - enabled: 1
+    path: Assets/Scenes/NextStage.unity
+    guid: 4af1de3839dafad4b95641630117b84f
   m_configObjects: {}
