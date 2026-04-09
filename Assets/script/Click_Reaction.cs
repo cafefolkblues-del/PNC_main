@@ -2,8 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 2D 사각형(SpriteRenderer + BoxCollider2D)에 마우스를 올리면 색이 바뀌고,
-/// 클릭하면 짧게 커졌다가 돌아오며 색이 깜빡입니다.
+/// 2D 스프라이트(SpriteRenderer + BoxCollider2D): 마우스 오버/클릭 시 선택적으로 색·스케일 피드백.
+/// 기본값은 idle에서 스프라이트 원색(틴트 없음)을 유지합니다.
 /// </summary>
 public class Click_Reaction : MonoBehaviour
 {
@@ -14,13 +14,13 @@ public class Click_Reaction : MonoBehaviour
     [SerializeField] DialoguePanel dialoguePanel;
 
     [TextArea(2, 5)]
-    [SerializeField] string dialogueMessage =
-        "You opened this dialogue by clicking the rectangle.\nPress Close when you are done.";
+    [SerializeField] string dialogueMessage = "somthing smells wrong";
 
     [Header("Visual feedback")]
-    [SerializeField] Color normalColor = new Color(0.4f, 0.55f, 0.85f, 1f);
-    [SerializeField] Color hoverColor = new Color(0.55f, 0.75f, 1f, 1f);
-    [SerializeField] Color clickFlashColor = new Color(1f, 0.85f, 0.5f, 1f);
+    [Tooltip("마우스를 올리지 않을 때 스프라이트에 곱할 색 (기본 흰색 = 원본 그대로)")]
+    [SerializeField] Color normalColor = Color.white;
+    [SerializeField] Color hoverColor = Color.white;
+    [SerializeField] Color clickFlashColor = Color.white;
     [SerializeField] float clickPulseScale = 1.12f;
     [SerializeField] float clickPulseDuration = 0.12f;
 
@@ -28,11 +28,19 @@ public class Click_Reaction : MonoBehaviour
     Vector3 _baseScale;
     bool _hovering;
     Coroutine _clickRoutine;
+    Color _idleColor;
 
     void Awake()
     {
         _sprite = GetComponent<SpriteRenderer>();
         _baseScale = transform.localScale;
+
+        // 피드백 색이 모두 동일하면 반응이 보이지 않으므로 기본 어둡기 변화를 자동 적용.
+        if (normalColor == hoverColor && normalColor == clickFlashColor)
+        {
+            hoverColor = new Color(0.86f, 0.86f, 0.86f, 1f);
+            clickFlashColor = new Color(0.72f, 0.72f, 0.72f, 1f);
+        }
 
         if (_sprite != null && _sprite.sprite == null)
         {
@@ -44,9 +52,15 @@ public class Click_Reaction : MonoBehaviour
         }
 
         if (_sprite != null)
-            _sprite.color = normalColor;
+        {
+            _idleColor = normalColor;
+            _sprite.color = _idleColor;
+        }
 
         var col = GetComponent<BoxCollider2D>();
+        if (col == null)
+            col = gameObject.AddComponent<BoxCollider2D>();
+
         if (col != null && _sprite != null && _sprite.sprite != null)
             col.size = _sprite.sprite.bounds.size;
 
@@ -72,7 +86,7 @@ public class Click_Reaction : MonoBehaviour
     {
         _hovering = false;
         if (_sprite != null)
-            _sprite.color = normalColor;
+            _sprite.color = _idleColor;
     }
 
     void OnMouseDown()
@@ -95,7 +109,7 @@ public class Click_Reaction : MonoBehaviour
 
         transform.localScale = _baseScale;
         if (_sprite != null)
-            _sprite.color = _hovering ? hoverColor : normalColor;
+            _sprite.color = _hovering ? hoverColor : _idleColor;
 
         _clickRoutine = null;
     }
