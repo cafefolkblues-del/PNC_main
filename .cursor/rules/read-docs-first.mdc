@@ -1,0 +1,26 @@
+---
+description: PnC Unity — 답변·코드 수정 전 읽을 문서 (온보딩·필요 시 @read-docs-first)
+alwaysApply: false
+---
+
+# 이 프로젝트에서 **가장 먼저** 읽을 것
+
+팀원이 **이 폴더를 Cursor로 처음 연다면** 루트 `README.md`가 자동으로 열리도록 `.vscode/settings.json`에 `workbench.startupEditor`가 설정되어 있음 (이전 세션 탭이 그대로 복원되면 README가 안 뜰 수 있음 — 그때는 `README.md`를 직접 연다).
+
+**새 AI 대화**에서 문서 순서를 강하게 넣고 싶으면 채팅에 **`@read-docs-first`** 로 이 규칙을 불러오면 됨.
+
+코드 제안·씬/Unity 질문에 앞서, 아래를 **우선 맥락으로 사용**할 것.
+
+1. **루트 `README.md`** — GitHub pull/push, Cursor용 요약, 코드 구조·유지보수 요약  
+2. **`Assets/TeamDistribution/Docs/BEGINNER_CURSOR_KR.md`**  
+   Unity 거의 처음 + Cursor 위주 팀원용 — 용어, 첫날 10단계, Cursor 프롬프트 예시, 흔한 오류.  
+3. **`Assets/TeamDistribution/Docs/TEAM_BUILD.md`**  
+   `TeamDistribution` 전체 — 컴포넌트 표, 에디터 메뉴, TMP/DOTween, Build Settings, 검증 플로우.
+
+추가: **`AGENTS.md`**.
+
+## 수정 시 준수
+
+- 게임/씬 로직은 **`TeamDistribution` 네임스페이스·기존 스크립트 패턴**에 맞출 것. `FlagStore` / `InventorySystem` / `Interactable` 등 싱글톤·흐름을 함부로 깨지 말 것.
+- **`Library/`** 는 건드리지 말 것 (생성물).
+- 팀원이 Unity 초보라면 **Inspector·메뉴 경로**를 한두 문장으로 짚어 줄 것.

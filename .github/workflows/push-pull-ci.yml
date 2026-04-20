@@ -1,0 +1,84 @@
+name: Push Pull CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  project-sanity:
+    name: Unity Project Sanity Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required Unity project folders
+        run: |
+          test -d Assets || (echo "Missing Assets/"; exit 1)
+          test -d Packages || (echo "Missing Packages/"; exit 1)
+          test -d ProjectSettings || (echo "Missing ProjectSettings/"; exit 1)
+          test -f Packages/manifest.json || (echo "Missing Packages/manifest.json"; exit 1)
+          test -f ProjectSettings/ProjectVersion.txt || (echo "Missing ProjectSettings/ProjectVersion.txt"; exit 1)
+
+      - name: Prevent committing local cache/build folders
+        run: |
+          set -e
+          blocked='^(Library/|Temp/|Logs/|UserSettings/|Builds/)'
+          if git ls-files | grep -E "$blocked" >/dev/null; then
+            echo "Tracked files include blocked Unity local folders."
+            git ls-files | grep -E "$blocked" || true
+            exit 1
+          fi
+
+      - name: Check Unity asset meta integrity
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import sys
+
+          root = pathlib.Path(".")
+          skip_dirs = {".git", "Library", "Temp", "Logs", "UserSettings", "Builds"}
+          asset_ext_skip = {".meta"}
+
+          def ignored(path: pathlib.Path) -> bool:
+              return any(part in skip_dirs for part in path.parts)
+
+          missing_meta = []
+          orphan_meta = []
+
+          for p in root.rglob("*"):
+              if not p.is_file() or ignored(p):
+                  continue
+              if p.suffix in asset_ext_skip:
+                  origin = pathlib.Path(str(p)[:-5])
+                  if not origin.exists():
+                      orphan_meta.append(str(p))
+              else:
+                  meta = pathlib.Path(str(p) + ".meta")
+                  if not meta.exists():
+                      # Skip common text files outside Unity asset database scope.
+                      if p.parts[0] in {".github", ".vscode"}:
+                          continue
+                      if p.name in {"README.md", "AGENTS.md", ".gitignore", ".vsconfig"}:
+                          continue
+                      missing_meta.append(str(p))
+
+          if missing_meta or orphan_meta:
+              if missing_meta:
+                  print("Missing .meta files:")
+                  for item in missing_meta[:100]:
+                      print(f"  - {item}")
+              if orphan_meta:
+                  print("Orphan .meta files:")
+                  for item in orphan_meta[:100]:
+                      print(f"  - {item}")
+              sys.exit(1)
+
+          print("Unity meta integrity check passed.")
+          PY
