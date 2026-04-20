@@ -16,7 +16,6 @@
 *.blend1.meta
 
 /[Mm]emoryCaptures/
-
 /[Rr]ecordings/
 
 # /[Aa]ssets/AssetStoreTools*
@@ -25,7 +24,6 @@
 *.DotSettings.user
 
 .vs/
-
 .gradle/
 
 ExportedObj/
@@ -50,7 +48,6 @@ ExportedObj/
 *.mdb.meta
 
 sysinfo.txt
-
 mono_crash.*
 
 *.apk
@@ -75,3 +72,6 @@ InitTestScene*.unity*
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
 
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Nested third-party clone (separate git history)
+/pnc/
